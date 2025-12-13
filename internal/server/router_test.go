@@ -74,7 +74,7 @@ func Test_exec(t *testing.T) {
 		}
 		resp, err := srv.post("/v1/exec", in)
 		be.Err(t, err, nil)
-		out := decodeResp[engine.Execution](t, resp)
+		out := decodeJSON[engine.Execution](t, resp)
 		be.True(t, out.OK)
 		be.Equal(t, out.Stdout, "hello")
 		be.Equal(t, out.Stderr, "")
@@ -89,7 +89,7 @@ func Test_exec(t *testing.T) {
 		resp, err := srv.post("/v1/exec", in)
 		be.Err(t, err, nil)
 		be.Equal(t, resp.StatusCode, http.StatusNotFound)
-		out := decodeResp[engine.Execution](t, resp)
+		out := decodeJSON[engine.Execution](t, resp)
 		be.Equal(t, out.OK, false)
 		be.Equal(t, out.Stdout, "")
 		be.Equal(t, out.Stderr, "unknown sandbox")
@@ -104,7 +104,7 @@ func Test_exec(t *testing.T) {
 		resp, err := srv.post("/v1/exec", in)
 		be.Err(t, err, nil)
 		be.Equal(t, resp.StatusCode, http.StatusBadRequest)
-		out := decodeResp[engine.Execution](t, resp)
+		out := decodeJSON[engine.Execution](t, resp)
 		be.Equal(t, out.OK, false)
 		be.Equal(t, out.Stdout, "")
 		be.Equal(t, out.Stderr, "empty request")
@@ -112,10 +112,36 @@ func Test_exec(t *testing.T) {
 	})
 }
 
-func decodeResp[T any](t *testing.T, resp *http.Response) T {
+func Test_health(t *testing.T) {
+	srv := newServer()
+	defer srv.close()
+
+	t.Run("get", func(t *testing.T) {
+		resp, err := srv.cli.Get(srv.srv.URL + "/v1/health")
+		be.Err(t, err, nil)
+		be.Equal(t, resp.StatusCode, http.StatusOK)
+		got := decodeText(t, resp)
+		be.Equal(t, got, "OK")
+	})
+	t.Run("head", func(t *testing.T) {
+		resp, err := srv.cli.Head(srv.srv.URL + "/v1/health")
+		be.Err(t, err, nil)
+		be.Equal(t, resp.StatusCode, http.StatusOK)
+	})
+}
+
+func decodeJSON[T any](t *testing.T, resp *http.Response) T {
 	defer func() { _ = resp.Body.Close() }()
 	var val T
 	err := json.NewDecoder(resp.Body).Decode(&val)
 	be.Err(t, err, nil)
 	return val
+}
+
+func decodeText(t *testing.T, resp *http.Response) string {
+	defer func() { _ = resp.Body.Close() }()
+	buf := new(bytes.Buffer)
+	_, err := buf.ReadFrom(resp.Body)
+	be.Err(t, err, nil)
+	return buf.String()
 }

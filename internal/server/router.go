@@ -17,6 +17,7 @@ import (
 func NewRouter() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/exec", enableCORS(exec))
+	mux.HandleFunc("/v1/health", enableCORS(health))
 	return mux
 }
 
@@ -88,4 +89,9 @@ func exec(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, engine.Fail(in.ID, err))
 		return
 	}
+}
+
+// health returns server health status.
+func health(w http.ResponseWriter, _ *http.Request) {
+	_, _ = w.Write([]byte("OK"))
 }
