@@ -14,7 +14,7 @@ mv codapi codapi.bak
 ```sh
 cd /opt/codapi
 export version="0.x.x"
-curl -L -o codapi.tar.gz "https://github.com/nalgeon/codapi/releases/download/${version}/codapi_${version}_linux_amd64.tar.gz"
+curl -L -o codapi.tar.gz "https://github.com/nalgeon/codapi/releases/download/v${version}/codapi_${version}_linux_amd64.tar.gz"
 tar xvzf codapi.tar.gz
 rm -f codapi.tar.gz
 ```
