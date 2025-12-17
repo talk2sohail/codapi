@@ -16,7 +16,7 @@ FROM alpine:latest
 ARG DOCKER_GID=988
 
 WORKDIR /app
-RUN apk update && apk add --no-cache docker-cli
+RUN apk update && apk add --no-cache docker-cli bash
 
 # Create a docker group with the same GID as the host's docker group
 RUN addgroup -S -g ${DOCKER_GID} docker
