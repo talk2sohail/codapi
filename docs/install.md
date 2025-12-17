@@ -110,3 +110,9 @@ Should print `ok` = `true`:
     "stderr": ""
 }
 ```
+
+
+6. Run the Golang code
+```sh
+curl -H "content-type: application/json" -d '{ "sandbox": "go", "command": "run", "files": {"": "package main\nimport \"fmt\"\nfunc main(){ fmt.Println(\"hello world\")}"
+ }}' http://localhost:1313/v1/exec```
