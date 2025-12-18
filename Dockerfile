@@ -10,8 +10,16 @@ RUN CGO_ENABLED=0 go build -o /codapi ./cmd/main.go
 
 # Runtime stage
 FROM alpine:latest
+
+# The GID of the docker group on the host.
+# Will be passed in as a build-arg.
+ARG DOCKER_GID=988
 WORKDIR /app
-RUN addgroup -S codapi && adduser -S codapi -G codapi
+RUN apk update && apk add --no-cache docker-cli
+# Create a docker group with the same GID as the host's docker group
+RUN addgroup -S -g ${DOCKER_GID} docker
+# Create the codapi user and add it to the new docker group
+RUN adduser -S -G docker codapi
 COPY --chown=codapi:codapi --from=builder /codapi /app/codapi
 COPY --chown=codapi:codapi sandboxes /app/sandboxes
 COPY --chown=codapi:codapi codapi.json /app/codapi.json
